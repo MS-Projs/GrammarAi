@@ -1,6 +1,7 @@
 using GrammarAi.Domain.Entities;
 using Telegram.Bot;
 using Telegram.Bot.Types;
+using User = GrammarAi.Domain.Entities.User;
 
 namespace GrammarAi.Infrastructure.Bot;
 

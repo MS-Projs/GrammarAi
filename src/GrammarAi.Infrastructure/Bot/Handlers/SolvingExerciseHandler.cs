@@ -2,6 +2,7 @@ using System.Text.Json;
 using GrammarAi.Application.Common.Interfaces;
 using GrammarAi.Domain.Enums;
 using Microsoft.EntityFrameworkCore;
+using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GrammarAi.Infrastructure.Bot.Handlers;

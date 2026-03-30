@@ -1,6 +1,7 @@
 using System.Text.Json;
 using GrammarAi.Application.Features.Exercises.Commands;
 using MediatR;
+using Telegram.Bot;
 using Telegram.Bot.Types.ReplyMarkups;
 
 namespace GrammarAi.Infrastructure.Bot.Handlers;

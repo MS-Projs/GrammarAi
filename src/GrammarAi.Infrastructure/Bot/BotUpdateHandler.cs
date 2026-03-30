@@ -6,6 +6,7 @@ using Microsoft.Extensions.Logging;
 using Telegram.Bot;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
+using User = GrammarAi.Domain.Entities.User;
 
 namespace GrammarAi.Infrastructure.Bot;
 
