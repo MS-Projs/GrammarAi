@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git -C /c/Users/PlumTech/OneDrive/Desktop/Grammar/GrammarAi/.claude/worktrees/confident-bell log --oneline -10)",
+      "Bash(find /c/Users/PlumTech/OneDrive/Desktop/Grammar/GrammarAi -name *.csproj -o -name *.cs)",
+      "Bash(git add:*)",
+      "Bash(git commit:*)",
+      "Bash(git push:*)"
+    ]
+  }
+}
