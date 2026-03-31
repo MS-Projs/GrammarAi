@@ -21,14 +21,18 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
 
       setAuth: (user, accessToken, refreshToken) => {
-        localStorage.setItem('accessToken', accessToken);
-        localStorage.setItem('refreshToken', refreshToken);
+        // Single source of truth: Zustand persist handles localStorage.
+        // Also set a lightweight cookie so Next.js middleware can guard routes SSR-side.
+        if (typeof document !== 'undefined') {
+          document.cookie = `grammarai_auth=1; path=/; max-age=${60 * 60 * 24 * 30}; SameSite=Lax`;
+        }
         set({ user, accessToken, refreshToken, isAuthenticated: true });
       },
 
       clearAuth: () => {
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
+        if (typeof document !== 'undefined') {
+          document.cookie = 'grammarai_auth=; path=/; max-age=0';
+        }
         set({ user: null, accessToken: null, refreshToken: null, isAuthenticated: false });
       },
 

@@ -16,18 +16,29 @@ export default function ResultsPage() {
   const [loading, setLoading]   = useState(true);
 
   useEffect(() => {
+    // Try to read the full result (including breakdown) written by ExercisePlayer
+    const cached = sessionStorage.getItem(`result:${id}`);
+    if (cached) {
+      try {
+        setResult(JSON.parse(cached) as SolveResultDto);
+      } catch { /* ignore */ }
+    }
+
     Promise.all([
       exercisesApi.getById(id),
-      exercisesApi.getResults(id),
+      // Fallback: fetch lightweight summary if no cached result
+      ...(!cached ? [exercisesApi.getResults(id)] : [Promise.resolve(null)]),
     ])
       .then(([ex, r]) => {
-        setExercise(ex);
-        setResult({
-          score:           r.score,
-          maxScore:        r.maxScore,
-          accuracyPercent: r.accuracyPercent,
-          breakdown:       [],
-        });
+        setExercise(ex as ExerciseDetailDto);
+        if (r && !cached) {
+          setResult({
+            score:           r.score,
+            maxScore:        r.maxScore,
+            accuracyPercent: r.accuracyPercent,
+            breakdown:       [],
+          });
+        }
       })
       .finally(() => setLoading(false));
   }, [id]);

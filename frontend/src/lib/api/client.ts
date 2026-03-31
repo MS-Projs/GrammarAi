@@ -8,12 +8,15 @@ export const apiClient = axios.create({
   timeout: 30_000,
 });
 
-// ── Request interceptor: attach access token ──────────────────────────────────
+// ── Request interceptor: attach access token from Zustand persisted store ────
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
   if (typeof window !== 'undefined') {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    try {
+      const raw = localStorage.getItem('grammarai-auth');
+      const token = raw ? (JSON.parse(raw) as { state?: { accessToken?: string } }).state?.accessToken : null;
+      if (token) config.headers.Authorization = `Bearer ${token}`;
+    } catch {
+      // corrupt storage — ignore
     }
   }
   return config;
@@ -46,19 +49,22 @@ apiClient.interceptors.response.use(
     original._retry = true;
     isRefreshing = true;
     try {
-      const refreshToken = localStorage.getItem('refreshToken');
+      const raw = localStorage.getItem('grammarai-auth');
+      const refreshToken = raw ? (JSON.parse(raw) as { state?: { refreshToken?: string } }).state?.refreshToken : null;
       if (!refreshToken) throw new Error('No refresh token');
       const { data } = await axios.post(`${API_URL}/api/v1/auth/refresh`, { refreshToken });
-      localStorage.setItem('accessToken', data.accessToken);
-      localStorage.setItem('refreshToken', data.refreshToken);
+      // Update Zustand persisted store with new tokens
+      const stored = raw ? JSON.parse(raw) as { state?: Record<string, unknown> } : { state: {} };
+      stored.state = { ...stored.state, accessToken: data.accessToken, refreshToken: data.refreshToken };
+      localStorage.setItem('grammarai-auth', JSON.stringify(stored));
       apiClient.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
       processQueue(null, data.accessToken);
       original.headers.Authorization = `Bearer ${data.accessToken}`;
       return apiClient(original);
     } catch (refreshError) {
       processQueue(refreshError, null);
-      localStorage.removeItem('accessToken');
-      localStorage.removeItem('refreshToken');
+      localStorage.removeItem('grammarai-auth');
+      if (typeof document !== 'undefined') document.cookie = 'grammarai_auth=; path=/; max-age=0';
       if (typeof window !== 'undefined') window.location.href = '/login';
       return Promise.reject(refreshError);
     } finally {

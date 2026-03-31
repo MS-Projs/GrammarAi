@@ -1,6 +1,6 @@
 'use client';
 import { Search } from 'lucide-react';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 
 const titles: Record<string, string> = {
   '/dashboard': 'Dashboard',
@@ -11,6 +11,7 @@ const titles: Record<string, string> = {
 
 export function Header() {
   const pathname = usePathname();
+  const router   = useRouter();
   const title = Object.entries(titles).find(([path]) => pathname === path || pathname.startsWith(path + '/'))?.[1] ?? 'GrammarAI';
 
   return (
@@ -26,7 +27,7 @@ export function Header() {
             onKeyDown={(e) => {
               if (e.key === 'Enter') {
                 const q = (e.target as HTMLInputElement).value.trim();
-                if (q) window.location.href = `/exercises?search=${encodeURIComponent(q)}`;
+                if (q) router.push(`/exercises?search=${encodeURIComponent(q)}`);
               }
             }}
           />

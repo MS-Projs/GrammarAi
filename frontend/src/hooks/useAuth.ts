@@ -13,9 +13,9 @@ export function useAuth() {
     async (initData: string) => {
       const result = await authApi.telegramLogin(initData);
       setAuth(result.user, result.accessToken, result.refreshToken);
-      router.push('/dashboard');
+      // Caller handles redirect — no double-push
     },
-    [setAuth, router],
+    [setAuth],
   );
 
   const logout = useCallback(async () => {

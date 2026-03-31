@@ -39,13 +39,18 @@ export function MatchingQuestion({ answers, selections, onChange, disabled, show
     setActiveLeft(null);
   };
 
+  /**
+   * The AI parser marks the correct right-side answer with isCorrect=true on the
+   * right-column item whose index matches the left-column item index.
+   * e.g. leftItems[0] should be matched with rightItems[0] (if rightItems[0].isCorrect).
+   */
   const getStatusColor = (leftIdx: number) => {
     if (!showCorrect) return '';
     const selectedId = selections[leftIdx];
-    const correctId  = rightItems.find((r, ri) => leftItems[leftIdx]?.isCorrect && ri === leftIdx)?.id;
-    if (!selectedId) return 'border-gray-200';
-    if (selectedId === correctId || (showCorrect && leftItems[leftIdx]?.isCorrect)) return 'border-green-500 bg-green-50';
-    return 'border-red-400 bg-red-50';
+    if (!selectedId) return 'border-gray-300';
+    const correctRightItem = rightItems[leftIdx];
+    const isCorrect = correctRightItem ? selectedId === correctRightItem.id : false;
+    return isCorrect ? 'border-green-500 bg-green-50' : 'border-red-400 bg-red-50';
   };
 
   return (

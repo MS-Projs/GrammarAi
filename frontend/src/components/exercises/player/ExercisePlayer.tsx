@@ -37,6 +37,16 @@ export function ExercisePlayer({ exercise, readOnly, onResult }: ExercisePlayerP
   const setAnswer = (qId: string, ans: QuestionAnswer) =>
     setAnswers((prev) => ({ ...prev, [qId]: ans }));
 
+  // Stamp per-question elapsed time before navigating away
+  const stampTime = () => {
+    const qId = currentQ?.id;
+    if (!qId) return;
+    setAnswers((prev) => ({
+      ...prev,
+      [qId]: { ...(prev[qId] ?? {}), timeSpentMs: Date.now() - qStartTs.current },
+    }));
+  };
+
   const handleSubmit = async () => {
     if (readOnly || submitting) return;
     setSubmitting(true);
@@ -47,12 +57,15 @@ export function ExercisePlayer({ exercise, readOnly, onResult }: ExercisePlayerP
           questionId:  q.id,
           answerId:    ans.answerId,
           freeText:    ans.freeText,
-          timeSpentMs: Math.round((Date.now() - startTs.current) / total),
+          // Per-question time tracked via qStartTs on navigation; total time split evenly as fallback
+          timeSpentMs: ans.timeSpentMs ?? Math.round((Date.now() - startTs.current) / total),
         };
       });
       const res = await exercisesApi.solve(exercise.id, payload);
       setResult(res);
       onResult?.(res);
+      // Persist result so the results page can read it after redirect
+      sessionStorage.setItem(`result:${exercise.id}`, JSON.stringify(res));
       router.push(`/exercises/${exercise.id}/results`);
     } catch {
       toast.error('Failed to submit. Please try again.');
@@ -101,7 +114,7 @@ export function ExercisePlayer({ exercise, readOnly, onResult }: ExercisePlayerP
         <Button
           variant="outline"
           icon={<ChevronLeft className="h-4 w-4" />}
-          onClick={() => setIdx((i) => Math.max(0, i - 1))}
+          onClick={() => { stampTime(); setIdx((i) => Math.max(0, i - 1)); }}
           disabled={idx === 0}
         >
           Previous
@@ -110,7 +123,7 @@ export function ExercisePlayer({ exercise, readOnly, onResult }: ExercisePlayerP
         {idx < total - 1 ? (
           <Button
             icon={<ChevronRight className="h-4 w-4" />}
-            onClick={() => setIdx((i) => i + 1)}
+            onClick={() => { stampTime(); setIdx((i) => i + 1); }}
           >
             Next
           </Button>

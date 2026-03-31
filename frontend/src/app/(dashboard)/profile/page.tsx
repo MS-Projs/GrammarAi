@@ -48,7 +48,7 @@ export default function ProfilePage() {
         </CardHeader>
         <div className="flex items-center gap-4 mb-6">
           <div className="flex h-14 w-14 items-center justify-center rounded-2xl bg-blue-100 text-2xl font-bold text-blue-700">
-            {user?.displayName.charAt(0).toUpperCase()}
+            {user?.displayName?.charAt(0)?.toUpperCase() ?? '?'}
           </div>
           <div>
             <p className="font-semibold text-gray-900">{user?.displayName}</p>
